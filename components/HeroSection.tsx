@@ -21,7 +21,7 @@ export default function HeroSection() {
       >
         <SwiperSlide>
           <div className="h-full w-full bg-cover bg-center flex items-center justify-center text-white"
-            style={{ backgroundImage: "url('/images/hero1.jpg')" }}>
+            style={{ backgroundImage: "url('image/hero1.jpg')" }}>
             <div className="bg-black/40 p-6 rounded-xl text-center">
               <h1 className="text-4xl md:text-6xl font-bold mb-4">Produk Digital Premium</h1>
               <p className="text-lg md:text-xl mb-6">Dapatkan akses instan dengan harga terbaik</p>

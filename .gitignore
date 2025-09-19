@@ -5,6 +5,11 @@
 
 # testing
 /coverage
+/image
+image/
+images
+/images
+image 
 
 # next.js
 /.next/
