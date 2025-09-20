@@ -1,32 +1,15 @@
 import "./globals.css";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/provider/ThemeProvider";
-import Navbar from "@/components/Navbar";  // ⬅️ import Navbar
-import Footer from "@/components/Footer";  // ⬅️ opsional kalau mau ada footer
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "GA Storee - Solusi Digital Lengkap",
-  description:
-    "Dapatkan lisensi AI, Streaming, Editing, dan Layanan Digital instan dengan pembayaran aman.",
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {/* Navbar selalu tampil */}
-          <Navbar />
-          <main className="pt-16">{children}</main>
-          {/* Footer opsional */}
-          {/* <Footer /> */}
+          {children}
         </ThemeProvider>
       </body>
     </html>

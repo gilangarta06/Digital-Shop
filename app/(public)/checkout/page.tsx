@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import Footer from '@/components/Footer';
+import Footer from '@/components/public/Footer';
 
 function CheckoutForm() {
   const searchParams = useSearchParams();
@@ -84,7 +84,7 @@ function CheckoutForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/create-transaction', {
+      const response = await fetch('/api/payments/create-transaction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -328,11 +328,8 @@ function CheckoutForm() {
 
 export default function CheckoutPage() {
   return (
-    <>
-      <Suspense fallback={<div>Loading...</div>}>
-        <CheckoutForm />
-      </Suspense>
-      <Footer />
-    </>
+    <Suspense fallback={<div>Loading...</div>}>
+      <CheckoutForm />
+    </Suspense>
   );
 }
