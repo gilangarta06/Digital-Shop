@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Order from "@/lib/models/Order";
+import Product from "@/lib/models/Product"; // ✅ Tambah import Product
 import { sendWhatsApp } from "@/lib/whatsapp";
 
 const midtransClient = require("midtrans-client");
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Order not found" }, { status: 404 });
     }
 
-    // 🔹 Update status order sesuai status dari Midtrans
+    // 🔹 Update status order
     if (transactionStatus === "capture" || transactionStatus === "settlement") {
       order.status = "paid";
     } else if (
@@ -45,15 +46,22 @@ export async function POST(req: NextRequest) {
     }
 
     await order.save();
-
-    // 🔹 Kirim WA hanya jika pembayaran sukses
     if (order.status === "paid") {
+      try {
+        await Product.updateOne(
+          { name: order.product_name, "variants.name": order.variant_name }, // pastikan order simpan variant_name
+          { $inc: { "variants.$.stock": -1 } }
+        );
+      } catch (stockError) {
+        console.error("⚠️ Gagal mengurangi stok:", stockError);
+      }
+
       const message = `✅ *Pembayaran Diterima*
 
 Halo *${order.customer_name}* 🎉
 Pembayaran untuk pesanan Anda sudah *berhasil*.
 
-🛒 *Produk:* ${order.product_name}
+🛒 *Produk:* ${order.product_name} (${order.variant_name ?? "-"})
 💰 *Harga:* Rp${order.gross_amount.toLocaleString("id-ID")}
 🆔 *Order ID:* ${order.order_id}
 
