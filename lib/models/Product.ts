@@ -14,7 +14,7 @@ export interface IProduct extends Document {
   variants: Variant[];
 }
 
-// ✅ Tambahkan tipe <IProduct> supaya TS tidak infer terlalu dalam
+// ✅ beri tipe Schema<IProduct> agar TS tidak infer otomatis
 const ProductSchema: Schema<IProduct> = new Schema<IProduct>(
   {
     name: { type: String, required: true },
@@ -34,8 +34,8 @@ const ProductSchema: Schema<IProduct> = new Schema<IProduct>(
   }
 );
 
-// ✅ Pastikan model tidak di-redeclare (untuk Next.js hot reload)
-const Product: Model<IProduct> =
-  mongoose.models.Product || mongoose.model<IProduct>("Product", ProductSchema);
+// ✅ gunakan as Model<IProduct> agar TS tidak infer union type yang terlalu kompleks
+const Product = (mongoose.models.Product ||
+  mongoose.model<IProduct>("Product", ProductSchema)) as Model<IProduct>;
 
 export default Product;
