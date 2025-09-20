@@ -1,42 +1,50 @@
 'use client';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 
 export default function HeroSection() {
   return (
-    <section id="home" className="pt-16">
-      <Swiper
-        modules={[Autoplay, Pagination, Navigation]}
-        spaceBetween={0}
-        slidesPerView={1}
-        loop={true}
-        autoplay={{ delay: 4000, disableOnInteraction: false }}
-        pagination={{ clickable: true }}
-        navigation
-        className="h-[80vh] w-full"
-      >
-        <SwiperSlide>
-          <div className="h-full w-full bg-cover bg-center flex items-center justify-center text-white"
-            style={{ backgroundImage: "url('/images/hero1.jpg')" }}>
-          </div>
-        </SwiperSlide>
+    <section
+      id="home"
+      className="pt-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 flex justify-center"
+    >
+      <div className="w-full max-w-5xl px-4">
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          spaceBetween={24}
+          slidesPerView={1}
+          loop={true}
+          autoplay={{ delay: 4000, disableOnInteraction: false }}
+          pagination={{ clickable: true }}
+        >
+          <SwiperSlide>
+            <img
+              src="/images/hero1.jpg"
+              alt="Hero Banner 1"
+              className="w-full h-[45vh] object-cover rounded-2xl shadow-lg"
+            />
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <div className="h-full w-full bg-cover bg-center flex items-center justify-center text-white"
-            style={{ backgroundImage: "url('/images/hero1.jpg')" }}>
-          </div>
-        </SwiperSlide>
+          <SwiperSlide>
+            <img
+              src="/images/hero-banner-2.png"
+              alt="Hero Banner 2"
+              className="w-full h-[45vh] object-cover rounded-2xl shadow-lg"
+            />
+          </SwiperSlide>
 
-        <SwiperSlide>
-          <div className="h-full w-full bg-cover bg-center flex items-center justify-center text-white"
-            style={{ backgroundImage: "url('/images/hero1.jpg')" }}>
-          </div>
-        </SwiperSlide>
-      </Swiper>
+          <SwiperSlide>
+            <img
+              src="/images/hero-banner-3.png"
+              alt="Hero Banner 3"
+              className="w-full h-[45vh] object-cover rounded-2xl shadow-lg"
+            />
+          </SwiperSlide>
+        </Swiper>
+      </div>
     </section>
   );
 }

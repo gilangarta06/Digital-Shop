@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Smartphone, Search, Moon, Sun, Menu, X } from 'lucide-react';
+import { Search, Moon, Sun, Menu, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
@@ -11,28 +11,31 @@ export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // pastikan hanya render setelah mount
   useEffect(() => setMounted(true), []);
 
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
 
   return (
-      <nav
-        className={`fixed top-0 w-full backdrop-blur-md border-b z-50 transition-all duration-700 ease-in-out shadow-xl
-          ${theme === 'dark'
-            ? 'bg-gray-900/95'
-            : 'bg-gradient-to-b from-white/95 to-blue-50/95'
-          }`}
-      >
+    <nav
+      className={`
+        fixed top-0 w-full backdrop-blur-md border-b z-50 transition-all duration-700 ease-in-out shadow-xl
+        bg-gradient-to-b from-white/95 to-blue-50/95 dark:from-gray-900/95 dark:to-gray-900/95
+      `}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
 
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <Smartphone className="h-8 w-8 text-blue-600 transition-transform duration-500 ease-in-out hover:scale-110 hover:rotate-12" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white transition-colors duration-500">
-              DigitalStore
-            </span>
+          <div className="flex items-center">
+            <a href="/" className="flex items-center">
+              {mounted && (
+                <img
+                  src={theme === 'dark' ? "/images/logo.png" : "/images/logo.png"}
+                  alt="GA Stroree"
+                  className="h-20 w-auto object-contain transition-transform duration-500 hover:scale-110"
+                />
+              )}
+            </a>
           </div>
 
           {/* Desktop Search */}
@@ -57,7 +60,9 @@ export default function Navbar() {
                 className="transition-transform duration-500 hover:rotate-12 hover:scale-110 focus:outline-none"
                 aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               >
-                {theme === 'dark' ? <Sun className="h-5 w-5 text-yellow-400" /> : <Moon className="h-5 w-5 text-gray-700" />}
+                {theme === 'dark'
+                  ? <Sun className="h-5 w-5 text-yellow-400" />
+                  : <Moon className="h-5 w-5 text-gray-700" />}
               </Button>
             )}
 

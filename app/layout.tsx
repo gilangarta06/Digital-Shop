@@ -8,7 +8,7 @@ import Footer from "@/components/Footer";  // ⬅️ opsional kalau mau ada foot
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DigitalStore - Solusi Digital Lengkap",
+  title: "GA Storee - Solusi Digital Lengkap",
   description:
     "Dapatkan lisensi AI, Streaming, Editing, dan Layanan Digital instan dengan pembayaran aman.",
 };
