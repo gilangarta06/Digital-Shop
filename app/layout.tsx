@@ -1,7 +1,9 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/provider/ThemeProvider"; // ⬅️ arahkan ke file yg barusan dibuat
+import { ThemeProvider } from "@/provider/ThemeProvider";
+import Navbar from "@/components/Navbar";  // ⬅️ import Navbar
+import Footer from "@/components/Footer";  // ⬅️ opsional kalau mau ada footer
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +22,11 @@ export default function RootLayout({
     <html lang="id" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          {/* Navbar selalu tampil */}
+          <Navbar />
+          <main className="pt-16">{children}</main>
+          {/* Footer opsional */}
+          {/* <Footer /> */}
         </ThemeProvider>
       </body>
     </html>
