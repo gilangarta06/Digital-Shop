@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Order from "@/lib/models/Order";
 import Product from "@/lib/models/Product";
-import Account from "@/lib/models/Accounts"; // ✅ Tambah import Account
+import Account from "@/lib/models/Accounts";
 import { sendWhatsApp } from "@/lib/whatsapp";
 
 const midtransClient = require("midtrans-client");
@@ -17,21 +17,27 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const notification = await req.json();
+    console.log("📩 Payload notifikasi diterima:", notification);
 
-    // 🔹 Verifikasi ke Midtrans
+    // 🔹 Verifikasi status ke Midtrans
     const statusResponse = await core.transaction.notification(notification);
+    console.log("📥 Status Response Midtrans:", statusResponse);
+
     const orderId = statusResponse.order_id;
     const transactionStatus = statusResponse.transaction_status;
     const fraudStatus = statusResponse.fraud_status;
 
-    console.log("📥 Notifikasi Midtrans:", statusResponse);
-
     // 🔹 Cari order di database
     const order = await Order.findOne({ order_id: orderId });
     if (!order) {
-      console.error("❌ Order tidak ditemukan:", orderId);
-      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+      console.warn("⚠️ Order tidak ditemukan di database:", orderId);
+      return NextResponse.json(
+        { message: "Order not found but acknowledged" },
+        { status: 200 }
+      );
     }
+
+    console.log(`✅ Order ditemukan: ${orderId}, status lama: ${order.status}`);
 
     // 🔹 Update status order
     if (transactionStatus === "capture" || transactionStatus === "settlement") {
@@ -47,17 +53,12 @@ export async function POST(req: NextRequest) {
     }
 
     await order.save();
+    console.log(`🔄 Status order diperbarui: ${order.status}`);
 
     // ✅ Jika sudah dibayar, kurangi stok dan kirim akun premium
     if (order.status === "paid") {
       try {
-        // 🔹 Kurangi stok produk
-        await Product.updateOne(
-          { name: order.product_name, "variants.name": order.variant_name },
-          { $inc: { "variants.$.stock": -1 } }
-        );
-
-        // 🔹 Ambil akun premium yang tersedia
+        // 🔹 Ambil akun premium dulu sebelum kurangi stok
         const account = await Account.findOne({
           product_id: order.product_id,
           variant_name: order.variant_name,
@@ -67,11 +68,19 @@ export async function POST(req: NextRequest) {
         if (!account) {
           console.error("⚠️ Tidak ada akun tersedia untuk pesanan ini.");
         } else {
-          // Tandai akun sebagai terjual
+          console.log("✅ Akun premium ditemukan:", account.username);
+
+          // 🔹 Kurangi stok produk
+          await Product.updateOne(
+            { name: order.product_name, "variants.name": order.variant_name },
+            { $inc: { "variants.$.stock": -1 } }
+          );
+          console.log("📉 Stok produk dikurangi 1");
+
+          // 🔹 Tandai akun sebagai terjual
           account.is_sold = true;
           await account.save();
 
-          // 🔹 Kirim akun via WhatsApp
           const message = `✅ *Pembayaran Diterima*
 
 Halo *${order.customer_name}* 🎉
@@ -88,8 +97,10 @@ Berikut akun premium Anda:
 Selamat menikmati layanan premium 🚀
 Terima kasih sudah belanja di *DigitalStore*! 🙌`;
 
+          console.log("📤 Mengirim WA ke:", order.customer_phone);
           try {
             await sendWhatsApp(order.customer_phone, message);
+            console.log("✅ WA konfirmasi berhasil dikirim");
           } catch (waError) {
             console.error("⚠️ Gagal kirim WA konfirmasi:", waError);
           }
@@ -99,12 +110,12 @@ Terima kasih sudah belanja di *DigitalStore*! 🙌`;
       }
     }
 
-    return NextResponse.json({ message: "OK" });
+    return NextResponse.json({ message: "OK" }, { status: 200 });
   } catch (error) {
     console.error("❌ Error Midtrans Notification:", error);
     return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
+      { message: "Webhook error but acknowledged" },
+      { status: 200 }
     );
   }
 }
