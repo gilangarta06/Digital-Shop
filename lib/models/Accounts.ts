@@ -1,6 +1,6 @@
 import mongoose, { Document, Model } from "mongoose";
 
-// Definisikan tipe Account
+// 1. Definisikan tipe Account
 export interface IAccount extends Document {
   product_id: mongoose.Types.ObjectId;
   variant_name: string;
@@ -9,6 +9,7 @@ export interface IAccount extends Document {
   is_sold?: boolean;
 }
 
+// 2. Schema
 const AccountSchema = new mongoose.Schema<IAccount>({
   product_id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
   variant_name: { type: String, required: true },
@@ -17,8 +18,9 @@ const AccountSchema = new mongoose.Schema<IAccount>({
   is_sold: { type: Boolean, default: false },
 });
 
-// Gunakan Model<IAccount> supaya type aman
+// 3. Pastikan tipe Model<IAccount> eksplisit
 const Account: Model<IAccount> =
-  mongoose.models.Account || mongoose.model<IAccount>("Account", AccountSchema);
+  (mongoose.models.Account as Model<IAccount>) ||
+  mongoose.model<IAccount>("Account", AccountSchema);
 
 export default Account;
