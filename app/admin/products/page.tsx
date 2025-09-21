@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Pencil, Search, X } from "lucide-react";
@@ -10,11 +10,9 @@ export default function DashboardProducts() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  // Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
 
-  // Form Tambah Produk
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [image, setImage] = useState("");
@@ -46,10 +44,7 @@ export default function DashboardProducts() {
     setVariants((prev) =>
       prev.map((v, i) =>
         i === index
-          ? {
-              ...v,
-              [field]: field === "price" || field === "stock" ? Number(value) : String(value),
-            }
+          ? { ...v, [field]: field === "price" || field === "stock" ? Number(value) : String(value) }
           : v
       )
     );
@@ -64,7 +59,6 @@ export default function DashboardProducts() {
       body: JSON.stringify({ name, category, image, description, variants }),
     });
 
-    // Reset form
     setName("");
     setCategory("");
     setImage("");
@@ -73,29 +67,6 @@ export default function DashboardProducts() {
     setIsAddModalOpen(false);
 
     fetchProducts();
-  };
-
-  const handleEditVariantChange = (index: number, field: keyof Variant, value: string | number) => {
-    if (!editing) return;
-    setEditing((prev: any) => ({
-      ...prev,
-      variants: prev.variants.map((v: Variant, i: number) =>
-        i === index
-          ? {
-              ...v,
-              [field]: field === "price" || field === "stock" ? Number(value) : String(value),
-            }
-          : v
-      ),
-    }));
-  };
-
-  const handleAddEditVariant = () => {
-    if (!editing) return;
-    setEditing((prev: any) => ({
-      ...prev,
-      variants: [...prev.variants, { name: "", price: 0, stock: 0 }],
-    }));
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -118,103 +89,94 @@ export default function DashboardProducts() {
       p.category.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading)
-    return (
-      <p className="text-center text-gray-500 dark:text-gray-400">Loading...</p>
-    );
+  if (loading) {
+    return <p className="text-center text-gray-500 dark:text-gray-400">Memuat data...</p>;
+  }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Kelola Produk
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Kelola Produk</h1>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition"
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition"
         >
           <Plus className="w-5 h-5" /> Tambah Produk
         </button>
       </div>
 
-      {/* Search / Filter */}
-      <div className="flex items-center gap-2 mb-4">
+      {/* Search */}
+      <div className="flex items-center gap-2 mb-6">
         <Search className="text-gray-500 w-5 h-5" />
         <input
           type="text"
           placeholder="Cari produk..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-green-500"
         />
       </div>
 
-      {/* Tabel Produk */}
-      <div className="overflow-x-auto border border-gray-300 dark:border-gray-700 rounded-xl shadow-md">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
-              <th className="p-3 text-left">Nama</th>
-              <th className="p-3 text-left">Kategori</th>
-              <th className="p-3 text-center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProducts.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={3}
-                  className="p-6 text-center text-gray-500 dark:text-gray-400"
+      {/* Produk */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {filteredProducts.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400">Tidak ada produk ditemukan.</p>
+        ) : (
+          filteredProducts.map((p) => (
+            <div
+              key={p._id}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700"
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={p.image || "/placeholder.png"}
+                  alt={p.name}
+                  className="w-20 h-20 object-cover rounded-lg border"
+                />
+                <div className="flex-1">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{p.name}</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{p.category}</p>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <button
+                  onClick={() => setEditing(p)}
+                  className="flex items-center gap-1 px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg"
                 >
-                  Tidak ada produk ditemukan
-                </td>
-              </tr>
-            ) : (
-              filteredProducts.map((p) => (
-                <tr
-                  key={p._id}
-                  className="border-t border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                  <Pencil className="w-4 h-4" /> Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(p._id)}
+                  className="flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg"
                 >
-                  <td className="p-3">{p.name}</td>
-                  <td className="p-3">{p.category}</td>
-                  <td className="p-3 text-center space-x-2">
-                    <button
-                      onClick={() => setEditing(p)}
-                      className="inline-flex items-center px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition"
-                    >
-                      <Pencil className="w-4 h-4 mr-1" /> Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(p._id)}
-                      className="inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" /> Hapus
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  <Trash2 className="w-4 h-4" /> Hapus
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
-      {/* MODAL Tambah Produk */}
+      {/* Modal Tambah */}
       {isAddModalOpen && (
         <Modal title="Tambah Produk" onClose={() => setIsAddModalOpen(false)}>
           <form onSubmit={handleAddProduct} className="space-y-4">
-            <input type="text" placeholder="Nama Produk" value={name} onChange={(e) => setName(e.target.value)} className="input" required />
-            <input type="text" placeholder="Kategori" value={category} onChange={(e) => setCategory(e.target.value)} className="input" required />
-            <input type="text" placeholder="Link Gambar" value={image} onChange={(e) => setImage(e.target.value)} className="input" required />
-            <textarea placeholder="Deskripsi Produk" value={description} onChange={(e) => setDescription(e.target.value)} className="input" />
+            <Input label="Nama Produk" value={name} onChange={setName} required />
+            <Input label="Kategori" value={category} onChange={setCategory} required />
+            <Input label="Link Gambar" value={image} onChange={setImage} required />
+            <Textarea label="Deskripsi" value={description} onChange={setDescription} />
 
             <h3 className="font-semibold text-gray-800 dark:text-gray-100">Varian Produk</h3>
-            {variants.map((variant, index) => (
-              <div key={index} className="grid grid-cols-3 gap-2 mb-2">
-                <input type="text" placeholder="Nama Varian" value={variant.name} onChange={(e) => handleVariantChange(index, "name", e.target.value)} className="input" />
-                <input type="number" placeholder="Harga" value={variant.price} onChange={(e) => handleVariantChange(index, "price", e.target.value)} className="input" />
-                <input type="number" placeholder="Stok" value={variant.stock} onChange={(e) => handleVariantChange(index, "stock", e.target.value)} className="input" />
-              </div>
-            ))}
+            <div className="space-y-2">
+              {variants.map((variant, index) => (
+                <div key={index} className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                  <input type="text" placeholder="Nama Varian" value={variant.name} onChange={(e) => handleVariantChange(index, "name", e.target.value)} className="input" />
+                  <input type="number" placeholder="Harga" value={variant.price} onChange={(e) => handleVariantChange(index, "price", e.target.value)} className="input" />
+                  <input type="number" placeholder="Stok" value={variant.stock} onChange={(e) => handleVariantChange(index, "stock", e.target.value)} className="input" />
+                </div>
+              ))}
+            </div>
 
             <button type="button" onClick={handleAddVariant} className="btn-secondary">
               <Plus className="w-4 h-4" /> Tambah Varian
@@ -228,25 +190,36 @@ export default function DashboardProducts() {
         </Modal>
       )}
 
-      {/* MODAL Edit Produk */}
+      {/* Modal Edit */}
       {editing && (
         <Modal title="Edit Produk" onClose={() => setEditing(null)}>
           <form onSubmit={handleUpdate} className="space-y-4">
-            <input type="text" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} className="input" />
-            <input type="text" value={editing.category} onChange={(e) => setEditing({ ...editing, category: e.target.value })} className="input" />
-            <textarea value={editing.description || ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} className="input" />
+            <Input label="Nama Produk" value={editing.name} onChange={(val) => setEditing({ ...editing, name: val })} />
+            <Input label="Kategori" value={editing.category} onChange={(val) => setEditing({ ...editing, category: val })} />
+            <Textarea label="Deskripsi" value={editing.description || ""} onChange={(val) => setEditing({ ...editing, description: val })} />
 
             <h3 className="font-semibold text-gray-800 dark:text-gray-100">Edit Varian</h3>
-            {editing.variants?.map((variant: Variant, index: number) => (
-              <div key={index} className="grid grid-cols-3 gap-2 mb-2">
-                <input type="text" value={variant.name} onChange={(e) => handleEditVariantChange(index, "name", e.target.value)} className="input" />
-                <input type="number" value={variant.price} onChange={(e) => handleEditVariantChange(index, "price", e.target.value)} className="input" />
-                <input type="number" value={variant.stock} onChange={(e) => handleEditVariantChange(index, "stock", e.target.value)} className="input" />
-              </div>
-            ))}
-            <button type="button" onClick={handleAddEditVariant} className="btn-secondary">
-              <Plus className="w-4 h-4" /> Tambah Varian
-            </button>
+            <div className="space-y-2">
+              {editing.variants?.map((variant: Variant, index: number) => (
+                <div key={index} className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
+                  <input type="text" value={variant.name} onChange={(e) => {
+                    const updated = [...editing.variants];
+                    updated[index].name = e.target.value;
+                    setEditing({ ...editing, variants: updated });
+                  }} className="input" />
+                  <input type="number" value={variant.price} onChange={(e) => {
+                    const updated = [...editing.variants];
+                    updated[index].price = Number(e.target.value);
+                    setEditing({ ...editing, variants: updated });
+                  }} className="input" />
+                  <input type="number" value={variant.stock} onChange={(e) => {
+                    const updated = [...editing.variants];
+                    updated[index].stock = Number(e.target.value);
+                    setEditing({ ...editing, variants: updated });
+                  }} className="input" />
+                </div>
+              ))}
+            </div>
 
             <div className="flex justify-end gap-2 pt-4">
               <button type="button" onClick={() => setEditing(null)} className="btn-secondary">Batal</button>
@@ -259,17 +232,35 @@ export default function DashboardProducts() {
   );
 }
 
-// Reusable Modal Component
+/* Komponen Reusable */
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-2xl shadow-lg relative">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-2xl shadow-lg relative animate-fadeIn">
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
           <X className="w-5 h-5" />
         </button>
         <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{title}</h2>
         {children}
       </div>
+    </div>
+  );
+}
+
+function Input({ label, value, onChange, required }: { label: string; value: string; onChange: (v: string) => void; required?: boolean }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} required={required} className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500" />
+    </div>
+  );
+}
+
+function Textarea({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
+      <textarea value={value} onChange={(e) => onChange(e.target.value)} className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500" />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Order from "@/lib/models/Order";
-import Product from "@/lib/models/Product"; // ✅ Tambah import Product
+import Product from "@/lib/models/Product";
+import Account from "@/lib/models/Accounts"; // ✅ Tambah import Account
 import { sendWhatsApp } from "@/lib/whatsapp";
 
 const midtransClient = require("midtrans-client");
@@ -46,17 +47,32 @@ export async function POST(req: NextRequest) {
     }
 
     await order.save();
+
+    // ✅ Jika sudah dibayar, kurangi stok dan kirim akun premium
     if (order.status === "paid") {
       try {
+        // 🔹 Kurangi stok produk
         await Product.updateOne(
-          { name: order.product_name, "variants.name": order.variant_name }, // pastikan order simpan variant_name
+          { name: order.product_name, "variants.name": order.variant_name },
           { $inc: { "variants.$.stock": -1 } }
         );
-      } catch (stockError) {
-        console.error("⚠️ Gagal mengurangi stok:", stockError);
-      }
 
-      const message = `✅ *Pembayaran Diterima*
+        // 🔹 Ambil akun premium yang tersedia
+        const account = await Account.findOne({
+          product_id: order.product_id,
+          variant_name: order.variant_name,
+          is_sold: false,
+        });
+
+        if (!account) {
+          console.error("⚠️ Tidak ada akun tersedia untuk pesanan ini.");
+        } else {
+          // Tandai akun sebagai terjual
+          account.is_sold = true;
+          await account.save();
+
+          // 🔹 Kirim akun via WhatsApp
+          const message = `✅ *Pembayaran Diterima*
 
 Halo *${order.customer_name}* 🎉
 Pembayaran untuk pesanan Anda sudah *berhasil*.
@@ -65,13 +81,21 @@ Pembayaran untuk pesanan Anda sudah *berhasil*.
 💰 *Harga:* Rp${order.gross_amount.toLocaleString("id-ID")}
 🆔 *Order ID:* ${order.order_id}
 
-Pesanan Anda sedang diproses 🚀
+Berikut akun premium Anda:
+👤 *Username:* ${account.username}
+🔑 *Password:* ${account.password}
+
+Selamat menikmati layanan premium 🚀
 Terima kasih sudah belanja di *DigitalStore*! 🙌`;
 
-      try {
-        await sendWhatsApp(order.customer_phone, message);
-      } catch (waError) {
-        console.error("⚠️ Gagal kirim WA konfirmasi:", waError);
+          try {
+            await sendWhatsApp(order.customer_phone, message);
+          } catch (waError) {
+            console.error("⚠️ Gagal kirim WA konfirmasi:", waError);
+          }
+        }
+      } catch (stockError) {
+        console.error("⚠️ Gagal memproses stok / akun:", stockError);
       }
     }
 
