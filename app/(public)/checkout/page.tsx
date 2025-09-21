@@ -21,7 +21,9 @@ function CheckoutForm() {
     customer_name: '',
     customer_phone: '',
     customer_email: '',
-    product_name: '',
+    product_id: '',     // ✅ ditambahkan
+    product_name: '',   // ✅ nama produk utama
+    variant_name: '',   // ✅ nama varian
     gross_amount: 0,
   });
 
@@ -60,7 +62,9 @@ function CheckoutForm() {
         setFormData((prev) => ({
           ...prev,
           order_id: 'INV-' + Date.now(),
-          product_name: selectedVariant?.name || '',
+          product_id: selectedProduct._id,
+          product_name: selectedProduct.name,
+          variant_name: selectedVariant?.name || '',
           gross_amount: selectedVariant?.price || 0,
         }));
       } catch (err) {
@@ -272,12 +276,14 @@ function CheckoutForm() {
                       onClick={() =>
                         setFormData((prev) => ({
                           ...prev,
-                          product_name: variant.name,
+                          product_id: activeProduct._id,
+                          product_name: activeProduct.name,
+                          variant_name: variant.name,
                           gross_amount: variant.price,
                         }))
                       }
                       className={`p-3 rounded-xl border text-sm font-medium transition text-left ${
-                        formData.product_name === variant.name
+                        formData.variant_name === variant.name
                           ? 'border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-900/30'
                           : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
                       }`}
