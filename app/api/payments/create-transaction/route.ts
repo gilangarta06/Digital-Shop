@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       },
       item_details: [
         {
-          id: product._id.toString(),
+          id: (product._id as any).toString(),
           price: amount,
           quantity: 1,
           name: `${product.name} - ${variant.name}`,
