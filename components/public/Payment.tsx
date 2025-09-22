@@ -7,13 +7,8 @@ import { useEffect, useState } from 'react';
 const banks = [
   { id: 'bca', name: 'BCA', src: '/banks/bca.png' },
   { id: 'bni', name: 'BNI', src: '/banks/bni.png' },
-  { id: 'bri', name: 'BRI', src: '/banks/bri.png' },
   { id: 'mandiri', name: 'Mandiri', src: '/banks/mandiri.png' },
-  { id: 'ovo', name: 'OVO', src: '/banks/ovo.png' },
-  { id: 'gopay', name: 'GoPay', src: '/banks/gopay.png' },
-  { id: 'dana', name: 'DANA', src: '/banks/dana.png' },
-  { id: 'shopeepay', name: 'ShopeePay', src: '/banks/shopeepay.png' },
-];
+]
 
 export default function PaymentMethods() {
   const { theme } = useTheme();
