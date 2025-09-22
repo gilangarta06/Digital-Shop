@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingBag, DollarSign, Shield, Headphones } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const features = [
   {
@@ -33,10 +34,10 @@ export default function Features() {
         
         {/* Heading */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4 transition-colors duration-500">
+          <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
             Mengapa <span className="text-blue-600 dark:text-blue-400">Memilih Kami?</span>
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto transition-colors duration-500">
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Keunggulan yang membuat pengalaman Anda lebih mudah, aman, dan menyenangkan
           </p>
         </div>
@@ -44,33 +45,44 @@ export default function Features() {
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <Card
+            <motion.div
               key={index}
-              className="group relative overflow-hidden border border-gray-100 dark:border-gray-700 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.15 }}
             >
-              <CardContent className="flex flex-col items-center text-center p-8">
-                
-                {/* Icon */}
-                <div
-                  className="h-16 w-16 flex items-center justify-center rounded-full mb-6 bg-blue-100 text-blue-600 dark:bg-gray-700 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300"
-                >
-                  <feature.icon className="h-8 w-8" />
-                </div>
+              <Card
+                className="group relative h-full overflow-hidden border border-gray-100 dark:border-gray-700 
+                  rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-[1.02]"
+              >
+                <CardContent className="flex flex-col items-center text-center p-6">
+                  {/* Icon */}
+                  <div
+                    className="h-16 w-16 flex items-center justify-center rounded-full mb-6 
+                      bg-gradient-to-r from-blue-100 to-blue-200 dark:from-gray-700 dark:to-gray-800 
+                      text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300"
+                  >
+                    <feature.icon className="h-8 w-8" />
+                  </div>
 
-                {/* Title */}
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 transition-colors duration-500">
-                  {feature.title}
-                </h3>
+                  {/* Title */}
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                    {feature.title}
+                  </h3>
 
-                {/* Description */}
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed transition-colors duration-500">
-                  {feature.description}
-                </p>
-              </CardContent>
+                  {/* Description */}
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {feature.description}
+                  </p>
+                </CardContent>
 
-              {/* Hover Border Effect */}
-              <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-blue-500/60 transition-all duration-500 pointer-events-none" />
-            </Card>
+                {/* Hover Border Glow */}
+                <div className="absolute inset-0 rounded-2xl border-2 border-transparent 
+                  group-hover:border-blue-500/70 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] 
+                  transition-all duration-300 pointer-events-none" />
+              </Card>
+            </motion.div>
           ))}
         </div>
       </div>

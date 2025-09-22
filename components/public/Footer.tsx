@@ -13,25 +13,30 @@ export default function Footer() {
 
   return (
     <footer
-      className={`py-12 transition-colors duration-500 ${
+      className={`relative pt-16 pb-10 transition-colors duration-300 ${
         theme === "dark"
-          ? "bg-gray-900 text-gray-300"
-          : "bg-gray-50 text-gray-700"
+          ? "bg-gradient-to-b from-gray-900 to-gray-950 text-gray-300"
+          : "bg-gradient-to-b from-gray-50 to-white text-gray-700"
       }`}
     >
+      {/* Gradient Divider */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+
       <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12">
         {/* Brand */}
         <div>
           <h3
-            className={`text-2xl font-bold transition-colors duration-500 ${
+            className={`text-2xl font-extrabold tracking-wide ${
               theme === "dark" ? "text-white" : "text-gray-900"
             }`}
           >
             DigitalStore
           </h3>
-          <p className="mt-4 text-sm leading-relaxed">
-            Solusi digital lengkap untuk semua kebutuhan Anda. Produk
-            berkualitas, harga terjangkau, layanan terbaik.
+          <p className="mt-4 text-sm leading-relaxed max-w-sm">
+            Solusi digital lengkap untuk semua kebutuhan Anda. Produk berkualitas, harga terjangkau, layanan terbaik.
+          </p>
+          <p className="mt-3 text-xs italic text-blue-500 dark:text-blue-400">
+            #BelanjaDigitalLebihMudah
           </p>
         </div>
 
@@ -46,38 +51,23 @@ export default function Footer() {
               Menu
             </h4>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Beranda
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/produk"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Produk
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/tentang"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Tentang Kami
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/kontak"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Kontak
-                </Link>
-              </li>
+              {[
+                { href: "/", label: "Beranda" },
+                { href: "/produk", label: "Produk" },
+                { href: "/tentang", label: "Tentang Kami" },
+                { href: "/kontak", label: "Kontak" },
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <Link
+                    href={item.href}
+                    className="relative inline-block hover:text-blue-600 transition-colors duration-300
+                               after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-blue-600 
+                               after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
@@ -89,38 +79,23 @@ export default function Footer() {
               Layanan
             </h4>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  href="/layanan/streaming"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Streaming
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/layanan/design"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Design Tools
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/layanan/software"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Software
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/layanan/premium"
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Paket Premium
-                </Link>
-              </li>
+              {[
+                { href: "/layanan/streaming", label: "Streaming" },
+                { href: "/layanan/design", label: "Design Tools" },
+                { href: "/layanan/software", label: "Software" },
+                { href: "/layanan/premium", label: "Paket Premium" },
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <Link
+                    href={item.href}
+                    className="relative inline-block hover:text-blue-600 transition-colors duration-300
+                               after:content-[''] after:absolute after:w-0 after:h-[2px] after:bg-blue-600 
+                               after:left-0 after:-bottom-1 after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -135,25 +110,16 @@ export default function Footer() {
             Ikuti Kami
           </h4>
           <div className="flex md:justify-start justify-center space-x-4">
-            {[FaFacebook, FaInstagram, FaTwitter, FaWhatsapp].map(
-              (Icon, idx) => (
-                <Link
-                  key={idx}
-                  href="#"
-                  className={`p-2 rounded-full transition-all duration-300 transform hover:scale-110 ${
-                    theme === "dark"
-                      ? "bg-gray-800 hover:bg-gray-700"
-                      : "bg-gray-200 hover:bg-gray-300"
-                  }`}
-                >
-                  <Icon
-                    className={`h-5 w-5 ${
-                      theme === "dark" ? "text-white" : "text-gray-900"
-                    }`}
-                  />
-                </Link>
-              )
-            )}
+            {[FaFacebook, FaInstagram, FaTwitter, FaWhatsapp].map((Icon, idx) => (
+              <Link
+                key={idx}
+                href="#"
+                className="p-3 rounded-full transition-all duration-500 transform hover:scale-110 
+                           bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md hover:shadow-xl"
+              >
+                <Icon className="h-5 w-5" />
+              </Link>
+            ))}
           </div>
         </div>
       </div>
@@ -166,7 +132,7 @@ export default function Footer() {
             : "border-gray-300 text-gray-600"
         }`}
       >
-        © {new Date().getFullYear()} DigitalStore. All rights reserved.
+        © {new Date().getFullYear()} <span className="font-semibold">DigitalStore</span>. All rights reserved.
       </div>
     </footer>
   );

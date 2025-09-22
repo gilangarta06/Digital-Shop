@@ -19,7 +19,6 @@ export default function DashboardProducts() {
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
 
-  // setiap variant sekarang punya optional accounts: VariantAccount[]
   const [variants, setVariants] = useState<Variant[]>([
     { name: "", price: 0, stock: 0, accounts: [] },
   ]);
@@ -44,23 +43,20 @@ export default function DashboardProducts() {
   };
 
   // ===== VARIANT HELPERS =====
-  // memastikan accounts length sama dengan stock
   const ensureAccountsLength = (acctList: VariantAccount[] = [], target: number) => {
     const result = [...acctList];
     if (result.length < target) {
       for (let i = result.length; i < target; i++) result.push({ username: "", password: "" });
     } else if (result.length > target) {
-      result.splice(target); // potong ke panjang target
+      result.splice(target);
     }
     return result;
   };
 
-  // menambah variant baru
   const handleAddVariant = () => {
     setVariants((prev) => [...prev, { name: "", price: 0, stock: 0, accounts: [] }]);
   };
 
-  // ubah field variant (name/price/stock)
   const handleVariantChange = (index: number, field: keyof Variant, value: string | number) => {
     setVariants((prev) =>
       prev.map((v, i) => {
@@ -69,7 +65,6 @@ export default function DashboardProducts() {
         if (field === "price" || field === "stock") {
           const num = Number(value || 0);
           next[field] = num;
-          // kalau stock berubah, sinkronkan accounts length
           if (field === "stock") {
             next.accounts = ensureAccountsLength(next.accounts || [], num);
           }
@@ -82,7 +77,6 @@ export default function DashboardProducts() {
     );
   };
 
-  // ubah akun untuk variant tertentu
   const handleVariantAccountChange = (
     variantIndex: number,
     accIndex: number,
@@ -93,7 +87,6 @@ export default function DashboardProducts() {
       prev.map((v, i) => {
         if (i !== variantIndex) return v;
         const accounts = [...(v.accounts || [])];
-        // safety: ensure index exists
         for (let k = accounts.length; k <= accIndex; k++) accounts.push({ username: "", password: "" });
         accounts[accIndex] = { ...accounts[accIndex], [field]: value };
         return { ...v, accounts };
@@ -101,14 +94,12 @@ export default function DashboardProducts() {
     );
   };
 
-  // menghapus satu akun input (opsional)
   const handleRemoveVariantAccount = (variantIndex: number, accIndex: number) => {
     setVariants((prev) =>
       prev.map((v, i) => {
         if (i !== variantIndex) return v;
         const accounts = [...(v.accounts || [])];
         accounts.splice(accIndex, 1);
-        // jika kita menghapus akun, juga sesuaikan stock agar konsisten dengan jumlah akun
         const newStock = accounts.length;
         return { ...v, accounts, stock: newStock };
       })
@@ -119,7 +110,20 @@ export default function DashboardProducts() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1) buat product terlebih dahulu (variants akan disimpan termasuk nilai stock awal)
+    // Validasi
+    for (const v of variants) {
+      if (v.price < 0 || v.stock < 0) {
+        alert("Harga dan stok tidak boleh negatif!");
+        return;
+      }
+      for (const acc of v.accounts || []) {
+        if (!acc.username.trim() || !acc.password.trim()) {
+          alert("Semua akun harus diisi username & password!");
+          return;
+        }
+      }
+    }
+
     const res = await fetch("/api/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -127,7 +131,6 @@ export default function DashboardProducts() {
     });
     const newProduct = await res.json();
 
-    // 2) untuk setiap variant, kirim akun yang tidak kosong
     if (newProduct._id) {
       for (const v of variants) {
         const variantName = v.name;
@@ -147,7 +150,6 @@ export default function DashboardProducts() {
       }
     }
 
-    // Reset form
     setName("");
     setCategory("");
     setImage("");
@@ -157,7 +159,6 @@ export default function DashboardProducts() {
     fetchProducts();
   };
 
-  // Update produk (sederhana, tanpa handle akun di edit modal)
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
@@ -189,7 +190,7 @@ export default function DashboardProducts() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Kelola Produk</h1>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition"
+          className="btn-primary flex items-center gap-2"
         >
           <Plus className="w-5 h-5" /> Tambah Produk
         </button>
@@ -203,7 +204,7 @@ export default function DashboardProducts() {
           placeholder="Cari produk..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring-2 focus:ring-green-500"
+          className="input flex-1"
         />
       </div>
 
@@ -225,10 +226,10 @@ export default function DashboardProducts() {
                 </div>
               </div>
               <div className="mt-4 flex justify-end gap-2">
-                <button onClick={() => setEditing(p)} className="flex items-center gap-1 px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg">
+                <button onClick={() => setEditing(p)} className="btn-secondary flex items-center gap-1">
                   <Pencil className="w-4 h-4" /> Edit
                 </button>
-                <button onClick={() => handleDelete(p._id)} className="flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                <button onClick={() => handleDelete(p._id)} className="btn-danger flex items-center gap-1">
                   <Trash2 className="w-4 h-4" /> Hapus
                 </button>
               </div>
@@ -246,76 +247,31 @@ export default function DashboardProducts() {
             <Input label="Link Gambar" value={image} onChange={setImage} required />
             <Textarea label="Deskripsi" value={description} onChange={setDescription} />
 
-            {/* Varian */}
             <h3 className="font-semibold text-gray-800 dark:text-gray-100">Varian Produk</h3>
             <div className="space-y-3">
               {variants.map((variant, vIndex) => (
                 <div key={vIndex} className="p-2 border rounded-lg bg-gray-50 dark:bg-gray-700">
                   <div className="grid grid-cols-3 gap-2 items-center">
-                    <input
-                      type="text"
-                      placeholder="Nama Varian (mis. 1 bulan)"
-                      value={variant.name}
-                      onChange={(e) => handleVariantChange(vIndex, "name", e.target.value)}
-                      className="input"
-                      required
-                    />
-                    <input
-                      type="number"
-                      placeholder="Harga"
-                      value={variant.price}
-                      onChange={(e) => handleVariantChange(vIndex, "price", e.target.value)}
-                      className="input"
-                      min={0}
-                      required
-                    />
-                    <input
-                      type="number"
-                      placeholder="Stok (jumlah akun)"
-                      value={variant.stock}
-                      onChange={(e) => handleVariantChange(vIndex, "stock", e.target.value)}
-                      className="input"
-                      min={0}
-                      required
-                    />
+                    <input type="text" placeholder="Nama Varian" value={variant.name}
+                      onChange={(e) => handleVariantChange(vIndex, "name", e.target.value)} className="input" required />
+                    <input type="number" placeholder="Harga" value={variant.price}
+                      onChange={(e) => handleVariantChange(vIndex, "price", e.target.value)} className="input" min={0} required />
+                    <input type="number" placeholder="Stok (jumlah akun)" value={variant.stock}
+                      onChange={(e) => handleVariantChange(vIndex, "stock", e.target.value)} className="input" min={0} required />
                   </div>
 
-                  {/* Accounts for this variant (jumlah otomatis = stock) */}
                   <div className="mt-3">
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Masukkan akun untuk varian ini (jumlah sesuai stok):</p>
-                    {(variant.accounts || []).length === 0 && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Belum ada akun — atur stok untuk generate input akun.</p>
-                    )}
-                    <div className="space-y-2">
-                      {(variant.accounts || []).map((acc, aIndex) => (
-                        <div key={aIndex} className="grid grid-cols-3 gap-2">
-                          <input
-                            type="text"
-                            placeholder="Username"
-                            value={acc.username}
-                            onChange={(e) => handleVariantAccountChange(vIndex, aIndex, "username", e.target.value)}
-                            className="input"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Password"
-                            value={acc.password}
-                            onChange={(e) => handleVariantAccountChange(vIndex, aIndex, "password", e.target.value)}
-                            className="input"
-                          />
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveVariantAccount(vIndex, aIndex)}
-                              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                            <span className="text-sm text-gray-500">#{aIndex + 1}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    {(variant.accounts || []).map((acc, aIndex) => (
+                      <div key={aIndex} className="grid grid-cols-3 gap-2 mb-2">
+                        <input type="text" placeholder="Username" value={acc.username}
+                          onChange={(e) => handleVariantAccountChange(vIndex, aIndex, "username", e.target.value)} className="input" />
+                        <input type="text" placeholder="Password" value={acc.password}
+                          onChange={(e) => handleVariantAccountChange(vIndex, aIndex, "password", e.target.value)} className="input" />
+                        <button type="button" onClick={() => handleRemoveVariantAccount(vIndex, aIndex)} className="btn-danger">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -326,18 +282,14 @@ export default function DashboardProducts() {
             </button>
 
             <div className="flex justify-end gap-2 pt-4">
-              <button type="button" onClick={() => setIsAddModalOpen(false)} className="btn-secondary">
-                Batal
-              </button>
-              <button type="submit" className="btn-primary">
-                Simpan Produk & Akun
-              </button>
+              <button type="button" onClick={() => setIsAddModalOpen(false)} className="btn-secondary">Batal</button>
+              <button type="submit" className="btn-primary">Simpan Produk & Akun</button>
             </div>
           </form>
         </Modal>
       )}
 
-      {/* Modal Edit (sederhana, hanya update product fields & variants) */}
+      {/* Modal Edit */}
       {editing && (
         <Modal title="Edit Produk" onClose={() => setEditing(null)}>
           <form onSubmit={handleUpdate} className="space-y-4">
@@ -382,8 +334,8 @@ export default function DashboardProducts() {
 /* Reusable UI components */
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-3xl shadow-lg relative animate-fadeIn">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-3xl shadow-lg relative animate-scaleIn overflow-y-auto max-h-[90vh]">
         <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
           <X className="w-5 h-5" />
         </button>
@@ -398,7 +350,7 @@ function Input({ label, value, onChange, required }: { label: string; value: str
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} required={required} className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500" />
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} required={required} className="input" />
     </div>
   );
 }
@@ -407,7 +359,27 @@ function Textarea({ label, value, onChange }: { label: string; value: string; on
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-      <textarea value={value} onChange={(e) => onChange(e.target.value)} className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500" />
+      <textarea value={value} onChange={(e) => onChange(e.target.value)} className="input" />
     </div>
   );
 }
+
+/* Global utility classes */
+const global = `
+.btn-primary {
+  @apply px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition;
+}
+.btn-secondary {
+  @apply px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg transition;
+}
+.btn-danger {
+  @apply px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition;
+}
+.input {
+  @apply w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500;
+}
+@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+.animate-fadeIn { animation: fadeIn 0.2s ease-in-out; }
+@keyframes scaleIn { from {transform: scale(0.95);} to {transform: scale(1);} }
+.animate-scaleIn { animation: scaleIn 0.2s ease-in-out; }
+`;
