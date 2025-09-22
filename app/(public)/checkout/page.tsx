@@ -21,9 +21,9 @@ function CheckoutForm() {
     customer_name: '',
     customer_phone: '',
     customer_email: '',
-    product_id: '',     // ✅ ditambahkan
-    product_name: '',   // ✅ nama produk utama
-    variant_name: '',   // ✅ nama varian
+    product_id: '',
+    product_name: '',
+    variant_name: '',
     gross_amount: 0,
   });
 
@@ -269,31 +269,39 @@ function CheckoutForm() {
                   Pilih Varian
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {activeProduct.variants.map((variant: any) => (
-                    <button
-                      key={variant.name}
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          product_id: activeProduct._id,
-                          product_name: activeProduct.name,
-                          variant_name: variant.name,
-                          gross_amount: variant.price,
-                        }))
-                      }
-                      className={`p-3 rounded-xl border text-sm font-medium transition text-left ${
-                        formData.variant_name === variant.name
-                          ? 'border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-900/30'
-                          : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
-                      }`}
-                    >
-                      <div>{variant.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {formatPrice(variant.price)}
-                      </div>
-                    </button>
-                  ))}
+                  {activeProduct.variants.map((variant: any) => {
+                    const isOutOfStock = variant.stock <= 0;
+                    return (
+                      <button
+                        key={variant.name}
+                        type="button"
+                        disabled={isOutOfStock}
+                        onClick={() =>
+                          !isOutOfStock &&
+                          setFormData((prev) => ({
+                            ...prev,
+                            product_id: activeProduct._id,
+                            product_name: activeProduct.name,
+                            variant_name: variant.name,
+                            gross_amount: variant.price,
+                          }))
+                        }
+                        className={`p-3 rounded-xl border text-sm font-medium transition text-left ${
+                          isOutOfStock
+                            ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
+                            : formData.variant_name === variant.name
+                            ? 'border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-900/30'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                        }`}
+                      >
+                        <div>{variant.name}</div>
+                        <div className="text-xs">
+                          {formatPrice(variant.price)}{' '}
+                          {isOutOfStock && '(Stok habis)'}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
