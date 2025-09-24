@@ -101,7 +101,7 @@ Pembayaran untuk pesanan Anda sudah *berhasil*.
 ⚠️ Saat ini akun premium *belum tersedia*.
 Silakan hubungi *Admin* untuk mendapatkan akun Anda. 🙏
 
-Terima kasih sudah belanja di *DigitalStore*! 🙌`;
+Terima kasih sudah belanja di *GA Store*! 🙌`;
 
       try {
         await sendWhatsApp(order.customer_phone, fallbackMessage);
@@ -147,5 +147,5 @@ Pembayaran untuk pesanan Anda sudah *berhasil*.
 🔒 Password: ${account.password}
 
 Selamat menikmati layanan premium 🚀
-Terima kasih sudah belanja di *DigitalStore*! 🙌`;
+Terima kasih sudah belanja di *GA Store*! 🙌`;
 }

@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
     
 Halo *${customer_name}* 👋
 
-Terima kasih sudah order di *DigitalStore* 🎉
+Terima kasih sudah order di *GA Store* 🎉
 
 🛒 *Produk:* ${product.name} - ${variant.name}
 💰 *Harga:* Rp${amount.toLocaleString("id-ID")}

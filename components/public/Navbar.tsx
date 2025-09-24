@@ -27,15 +27,12 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            {mounted && (
-              <img
-                src="/images/logo.png"
-                alt="GA Store"
-                className="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105"
-              />
-            )}
-          </Link>
+<img
+  src="/images/logo.svg"
+  alt="GA Store"
+  className="logo-navbar object-contain"
+  loading="lazy"
+/>
 
           {/* Desktop Search */}
           <div className="hidden md:flex flex-1 mx-8 max-w-lg">

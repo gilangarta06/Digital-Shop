@@ -30,7 +30,7 @@ export default function Footer() {
               theme === "dark" ? "text-white" : "text-gray-900"
             }`}
           >
-            DigitalStore
+            GA Store
           </h3>
           <p className="mt-4 text-sm leading-relaxed max-w-sm">
             Solusi digital lengkap untuk semua kebutuhan Anda. Produk berkualitas, harga terjangkau, layanan terbaik.
@@ -132,7 +132,7 @@ export default function Footer() {
             : "border-gray-300 text-gray-600"
         }`}
       >
-        © {new Date().getFullYear()} <span className="font-semibold">DigitalStore</span>. All rights reserved.
+        © {new Date().getFullYear()} <span className="font-semibold">GA Store</span>. All rights reserved.
       </div>
     </footer>
   );

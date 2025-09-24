@@ -51,7 +51,7 @@ Status: BERHASIL ✅
 Berikut detail akses produk Anda:
 Silakan hubungi CS kami untuk mendapatkan link download/kode akses.
 
-Terima kasih sudah berbelanja di DigitalStore 🙏`;
+Terima kasih sudah berbelanja di GA Store 🙏`;
 
       try {
         await sendWhatsApp(order.customer_phone, message);
