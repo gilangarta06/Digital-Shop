@@ -27,12 +27,12 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           
           {/* Logo */}
-<img
-  src="/images/logo.svg"
-  alt="GA Store"
-  className="logo-navbar object-contain"
-  loading="lazy"
-/>
+          <img
+            src="/images/logo.png"
+            alt="GA Store"
+            className="logo-navbar object-contain"
+            loading="lazy"
+          />
 
           {/* Desktop Search */}
           <div className="hidden md:flex flex-1 mx-8 max-w-lg">
