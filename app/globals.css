@@ -75,7 +75,7 @@
 img {
   max-width: 100%;
   height: auto;
-  max-height: 230px; /* Bisa jadi ada batas ini */
+  max-height: 230px;
 }
 
 @layer base {
