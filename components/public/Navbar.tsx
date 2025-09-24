@@ -32,7 +32,7 @@ export default function Navbar() {
               <img
                 src="/images/logo.png"
                 alt="GA Store"
-                className="h-14 w-auto object-contain transition-transform duration-300 hover:scale-110"
+                className="h-20 w-auto object-contain transition-transform duration-300 hover:scale-105"
               />
             )}
           </Link>
