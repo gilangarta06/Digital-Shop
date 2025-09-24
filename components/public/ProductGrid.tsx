@@ -30,7 +30,6 @@ export default function ProductGrid() {
   useEffect(() => {
     setMounted(true);
 
-    // ✅ Ambil data produk dari API
     const fetchProducts = async () => {
       try {
         const res = await fetch('/api/products');
@@ -44,14 +43,12 @@ export default function ProductGrid() {
     fetchProducts();
   }, []);
 
-  // ✅ Klik kartu produk → arahkan ke /checkout?product=xxx&variant=xxx
   const handleCardClick = (item: Product) => {
     const firstVariant = item.variants?.[0];
     const variantQuery = firstVariant ? `&variant=${encodeURIComponent(firstVariant.name)}` : '';
     router.push(`/checkout?product=${item._id}${variantQuery}`);
   };
 
-  // Ambil kategori unik dari produk
   const categories = Array.from(new Set(products.map((p) => p.category)));
 
   const displayedItems =
@@ -69,23 +66,24 @@ export default function ProductGrid() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-500">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             Kategori Produk
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 transition-colors duration-500">
-            Pilih produk digital sesuai kategori
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Pilih produk digital sesuai kebutuhanmu
           </p>
         </div>
 
         {/* Filter Kategori */}
-        <div className="flex justify-center mb-8 flex-wrap gap-3">
+        <div className="flex justify-center mb-10 flex-wrap gap-3">
           <button
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
+            className={`px-5 py-2 rounded-full font-medium transition-all duration-300 shadow-sm ${
               activeCategory === 'Semua'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
             onClick={() => setActiveCategory('Semua')}
           >
@@ -94,10 +92,10 @@ export default function ProductGrid() {
           {categories.map((cat) => (
             <button
               key={cat}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${
+              className={`px-5 py-2 rounded-full font-medium transition-all duration-300 shadow-sm ${
                 activeCategory === cat
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
               onClick={() => setActiveCategory(cat)}
             >
@@ -107,46 +105,46 @@ export default function ProductGrid() {
         </div>
 
         {/* Grid Produk */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayedItems.map((item) => {
-            // hitung stok total dari semua varian
             const totalStock = item.variants.reduce((acc, v) => acc + v.stock, 0);
 
             return (
               <Card
                 key={item._id}
-                className={`relative rounded-xl border border-gray-200 dark:border-gray-700 
-                           shadow-md transform transition-all duration-300 hover:scale-105 hover:shadow-xl 
-                           ${totalStock === 0 ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                className={`relative rounded-2xl border border-gray-200 dark:border-gray-700 
+                  bg-white dark:bg-gray-800 shadow-lg overflow-hidden transform 
+                  transition-all duration-300 hover:-translate-y-2 hover:shadow-xl
+                  ${totalStock === 0 ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                 onClick={() => totalStock > 0 && handleCardClick(item)}
               >
-                <CardContent className="p-6 text-center">
+                <CardContent className="p-6 flex flex-col items-center">
+                  
+                  {/* Badge stok */}
+                  <span
+                    className={`absolute top-4 right-4 px-3 py-1 text-xs font-semibold rounded-full 
+                      ${totalStock > 0 ? 'bg-yellow-400 text-gray-900' : 'bg-red-500 text-white'}`}
+                  >
+                    {totalStock > 0 ? `Tersisa ${totalStock}` : 'Habis'}
+                  </span>
+
                   {/* Gambar */}
-                  <div className="overflow-hidden rounded-lg mb-4 flex justify-center">
+                  <div className="w-28 h-28 mb-4 flex items-center justify-center overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-700">
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-28 h-28 object-contain transition-transform duration-500 hover:scale-110"
+                      className="w-full h-full object-contain transition-transform duration-500 hover:scale-110"
                     />
                   </div>
 
                   {/* Nama produk */}
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                  <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-1 text-center">
                     {item.name}
                   </h4>
 
                   {/* Kategori */}
-                  <p className="text-gray-500 dark:text-gray-300 text-sm mb-2">
-                    Kategori: {item.category}
-                  </p>
-
-                  {/* Info stok */}
-                  <p
-                    className={`font-semibold text-sm ${
-                      totalStock > 0 ? 'text-green-600' : 'text-red-500'
-                    }`}
-                  >
-                    {totalStock > 0 ? `Tersisa ${totalStock}` : 'Stock Habis'}
+                  <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">
+                    {item.category}
                   </p>
                 </CardContent>
               </Card>
