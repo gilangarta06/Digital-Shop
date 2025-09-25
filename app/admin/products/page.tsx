@@ -197,14 +197,14 @@ export default function DashboardProducts() {
       </div>
 
       {/* Search */}
-      <div className="flex items-center gap-2 mb-6">
-        <Search className="text-gray-500 w-5 h-5" />
+      <div className="flex items-center gap-2 mb-6 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border">
+        <Search className="text-gray-400 w-5 h-5" />
         <input
           type="text"
           placeholder="Cari produk..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="input flex-1"
+          className="w-full bg-transparent focus:outline-none text-gray-800 dark:text-gray-100"
         />
       </div>
 
@@ -216,7 +216,7 @@ export default function DashboardProducts() {
           filteredProducts.map((p) => (
             <div
               key={p._id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition"
             >
               <div className="flex items-center gap-4">
                 <img src={p.image || "/placeholder.png"} alt={p.name} className="w-20 h-20 object-cover rounded-lg border" />
@@ -363,23 +363,3 @@ function Textarea({ label, value, onChange }: { label: string; value: string; on
     </div>
   );
 }
-
-/* Global utility classes */
-const global = `
-.btn-primary {
-  @apply px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow transition;
-}
-.btn-secondary {
-  @apply px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-lg transition;
-}
-.btn-danger {
-  @apply px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition;
-}
-.input {
-  @apply w-full p-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500;
-}
-@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-.animate-fadeIn { animation: fadeIn 0.2s ease-in-out; }
-@keyframes scaleIn { from {transform: scale(0.95);} to {transform: scale(1);} }
-.animate-scaleIn { animation: scaleIn 0.2s ease-in-out; }
-`;

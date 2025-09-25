@@ -4,7 +4,7 @@ import Features from '@/components/public/Features';
 import ProductGrid from '@/components/public/ProductGrid';
 // import Footer from '@/components/public/Footer';
 import Testimoni from '@/components/public/Testimoni';
-import Payment from '@/components/public/Payment';
+// import Payment from '@/components/public/Payment';
 import Faq from '@/components/public/faq';
 
 export default function Home() {
@@ -15,7 +15,7 @@ export default function Home() {
       <Features />
       <ProductGrid />
       <Testimoni />
-      <Payment />
+      {/* <Payment /> */}
       <Faq />
       {/* <Footer /> */}
     </div>

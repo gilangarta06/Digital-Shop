@@ -72,10 +72,19 @@
   }
 }
 
-img {
+/* Global untuk gambar produk / konten */
+.content img,
+.product-card img {
   max-width: 100%;
   height: auto;
-  max-height: 230px;
+  max-height: 220px;
+}
+
+/* Jangan batasi logo / icon */
+.logo-navbar {
+  max-height: 150px; /* atau sesuai ukuran navbar */
+  height: auto;
+  width: auto;
 }
 
 @layer base {

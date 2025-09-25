@@ -110,7 +110,7 @@ export default function Footer() {
             Ikuti Kami
           </h4>
           <div className="flex md:justify-start justify-center space-x-4">
-            {[FaFacebook, FaInstagram, FaTwitter, FaWhatsapp].map((Icon, idx) => (
+            {[FaInstagram, FaWhatsapp].map((Icon, idx) => (
               <Link
                 key={idx}
                 href="#"

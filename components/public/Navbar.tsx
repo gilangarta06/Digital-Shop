@@ -5,16 +5,41 @@ import { Input } from '@/components/ui/input';
 import { Search, Moon, Sun, Menu, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // 🔹 Modal transaksi
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
+  const [status, setStatus] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => setMounted(true), []);
 
   const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+
+  // 🔹 Fetch transaksi
+  const checkTransaction = async () => {
+    if (!transactionId) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/orders/${transactionId}`);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatus(data.order.status);
+      } else {
+        setStatus('Transaksi tidak ditemukan');
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus('Gagal cek transaksi');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <nav
@@ -65,14 +90,15 @@ export default function Navbar() {
               </Button>
             )}
 
-            {/* CTA */}
+            {/* CTA: Cek Transaksi */}
             <Button
+              onClick={() => setIsModalOpen(true)}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700
                 text-white font-medium px-6 py-2 rounded-2xl transition-all duration-300
                 shadow-md hover:shadow-xl transform hover:-translate-y-1"
               size="sm"
             >
-              Daftar Sekarang
+              Cek Transaksi
             </Button>
 
             {/* Mobile Menu Button */}
@@ -126,16 +152,62 @@ export default function Navbar() {
 
               {/* CTA Mobile */}
               <Button
+                onClick={() => setIsModalOpen(true)}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700
                   text-white font-medium py-2 rounded-2xl transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1"
                 size="sm"
               >
-                Daftar Sekarang
+                Cek Transaksi
               </Button>
             </div>
           </div>
         )}
       </div>
+      {/* Modal Cek Transaksi */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 min-h-screen">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              Cek Status Transaksi
+            </h2>
+
+            <Input
+              type="text"
+              placeholder="Masukkan ID Transaksi"
+              value={transactionId}
+              onChange={(e) => setTransactionId(e.target.value)}
+              className="mb-4"
+            />
+
+            <div className="flex space-x-3">
+              <Button
+                onClick={checkTransaction}
+                disabled={loading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-xl"
+              >
+                {loading ? 'Mengecek...' : 'Cek'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setTransactionId('');
+                  setStatus(null);
+                }}
+                className="flex-1 rounded-xl"
+              >
+                Tutup
+              </Button>
+            </div>
+
+            {status && (
+              <div className="mt-4 p-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                Status: <span className="font-medium">{status}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
