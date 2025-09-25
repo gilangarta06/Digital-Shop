@@ -9,7 +9,6 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { forwardRef, useRef } from 'react'
 import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
@@ -445,18 +444,18 @@ const SidebarGroupLabel = React.forwardRef<
 >(({ className, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "div"
 
-  return (
-    <Comp
-      ref={ref}
-      data-sidebar="group-label"
-      className={cn(
-        "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
-        className
-      )}
-      {...props}
-    />
-  )
+return (
+  <Comp
+    // @ts-ignore
+    ref={ref}
+    data-sidebar="group-label"
+    className={cn(
+      "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+      className
+    )}
+    {...props}
+  />
+)
 })
 SidebarGroupLabel.displayName = "SidebarGroupLabel"
 
@@ -496,34 +495,18 @@ const SidebarGroupContent = React.forwardRef<
 ))
 SidebarGroupContent.displayName = "SidebarGroupContent"
 
-const SidebarMenu = forwardRef<HTMLUListElement, React.ComponentProps<'ul'>>(
-  ({ className, ...props }, ref) => {
-    // ✅ Use useRef to create a proper ref
-    const innerRef = useRef<HTMLUListElement>(null)
-
-    // ⚠️ Important: Combine the passed ref (if any) with innerRef
-    // This allows the parent to also access the ref via `forwardRef`
-    const combinedRef = (instance: HTMLUListElement | null) => {
-      innerRef.current = instance
-      if (typeof ref === 'function') {
-        ref(instance)
-      } else if (ref) {
-        ref.current = instance
-      }
-    }
-
-    return (
-      <ul
-        ref={combinedRef} // ✅ Use combined ref to support both parent and inner usage
-        data-sidebar="menu"
-        className={cn('flex w-full min-w-0 flex-col gap-1', className)}
-        {...props}
-      />
-    )
-  }
-)
-
-SidebarMenu.displayName = 'SidebarMenu'
+const SidebarMenu = React.forwardRef<
+  HTMLUListElement,
+  React.ComponentProps<"ul">
+>(({ className, ...props }, ref) => (
+  <ul
+    ref={ref}
+    data-sidebar="menu"
+    className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+    {...props}
+  />
+))
+SidebarMenu.displayName = "SidebarMenu"
 
 const SidebarMenuItem = React.forwardRef<
   HTMLLIElement,
