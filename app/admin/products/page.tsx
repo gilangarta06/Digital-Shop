@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Pencil, Search, X } from "lucide-react";
+import { Plus, Trash2, Pencil, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui/card";
 
 type VariantAccount = { username: string; password: string };
 type Variant = { name: string; price: number; stock: number; accounts?: VariantAccount[] };
@@ -18,31 +30,26 @@ export default function DashboardProducts() {
   const [category, setCategory] = useState("");
   const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
-
   const [variants, setVariants] = useState<Variant[]>([
     { name: "", price: 0, stock: 0, accounts: [] },
   ]);
 
-  // Fetch Produk
+  // === Fetch Produk ===
   const fetchProducts = async () => {
-    const res = await fetch("/api/products");
-    const data = await res.json();
-    setProducts(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/products");
+      const data = await res.json();
+      setProducts(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Hapus produk
-  const handleDelete = async (id: string) => {
-    if (!confirm("Yakin mau hapus produk ini?")) return;
-    await fetch(`/api/products/${id}`, { method: "DELETE" });
-    fetchProducts();
-  };
-
-  // ===== VARIANT HELPERS =====
+  // === Helpers ===
   const ensureAccountsLength = (acctList: VariantAccount[] = [], target: number) => {
     const result = [...acctList];
     if (result.length < target) {
@@ -100,61 +107,33 @@ export default function DashboardProducts() {
         if (i !== variantIndex) return v;
         const accounts = [...(v.accounts || [])];
         accounts.splice(accIndex, 1);
-        const newStock = accounts.length;
-        return { ...v, accounts, stock: newStock };
+        return { ...v, accounts, stock: accounts.length };
       })
     );
   };
 
-  // ===== SUBMIT: Simpan Produk + akun per-variant =====
+  // === CRUD ===
+  const handleDelete = async (id: string) => {
+    if (!confirm("Yakin mau hapus produk ini?")) return;
+    await fetch(`/api/products/${id}`, { method: "DELETE" });
+    fetchProducts();
+  };
+
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validasi
-    for (const v of variants) {
-      if (v.price < 0 || v.stock < 0) {
-        alert("Harga dan stok tidak boleh negatif!");
-        return;
-      }
-      for (const acc of v.accounts || []) {
-        if (!acc.username.trim() || !acc.password.trim()) {
-          alert("Semua akun harus diisi username & password!");
-          return;
-        }
-      }
-    }
-
-    const res = await fetch("/api/products", {
+    await fetch("/api/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, category, image, description, variants }),
     });
-    const newProduct = await res.json();
 
-    if (newProduct._id) {
-      for (const v of variants) {
-        const variantName = v.name;
-        const accountsToSend = (v.accounts || []).filter((a) => a.username?.trim() && a.password?.trim());
-        for (const acc of accountsToSend) {
-          await fetch("/api/accounts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              product_id: newProduct._id,
-              variant_name: variantName,
-              username: acc.username,
-              password: acc.password,
-            }),
-          });
-        }
-      }
-    }
-
+    // reset form
     setName("");
     setCategory("");
     setImage("");
     setDescription("");
     setVariants([{ name: "", price: 0, stock: 0, accounts: [] }]);
+
     setIsAddModalOpen(false);
     fetchProducts();
   };
@@ -162,23 +141,23 @@ export default function DashboardProducts() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
-
     await fetch(`/api/products/${editing._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editing),
     });
-
     setEditing(null);
     fetchProducts();
   };
 
+  // === Filter Produk ===
   const filteredProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.category.toLowerCase().includes(search.toLowerCase())
   );
 
+  // === Render ===
   if (loading) {
     return <p className="text-center text-gray-500 dark:text-gray-400">Memuat data...</p>;
   }
@@ -188,23 +167,20 @@ export default function DashboardProducts() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Kelola Produk</h1>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" /> Tambah Produk
-        </button>
+        <Button onClick={() => setIsAddModalOpen(true)}>
+          <Plus className="w-5 h-5 mr-2" /> Tambah Produk
+        </Button>
       </div>
 
       {/* Search */}
       <div className="flex items-center gap-2 mb-6 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm border">
         <Search className="text-gray-400 w-5 h-5" />
-        <input
+        <Input
           type="text"
           placeholder="Cari produk..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-transparent focus:outline-none text-gray-800 dark:text-gray-100"
+          className="border-0 focus-visible:ring-0"
         />
       </div>
 
@@ -214,152 +190,193 @@ export default function DashboardProducts() {
           <p className="text-gray-500 dark:text-gray-400">Tidak ada produk ditemukan.</p>
         ) : (
           filteredProducts.map((p) => (
-            <div
+            <Card
               key={p._id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition"
+              className="p-4 border shadow-sm hover:shadow-md transition"
             >
               <div className="flex items-center gap-4">
-                <img src={p.image || "/placeholder.png"} alt={p.name} className="w-20 h-20 object-cover rounded-lg border" />
+                <img
+                  src={p.image || "/placeholder.png"}
+                  alt={p.name}
+                  className="w-20 h-20 object-cover rounded-lg border"
+                />
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{p.name}</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{p.category}</p>
+                  <h2 className="text-lg font-semibold">{p.name}</h2>
+                  <p className="text-sm text-muted-foreground">{p.category}</p>
                 </div>
               </div>
               <div className="mt-4 flex justify-end gap-2">
-                <button onClick={() => setEditing(p)} className="btn-secondary flex items-center gap-1">
-                  <Pencil className="w-4 h-4" /> Edit
-                </button>
-                <button onClick={() => handleDelete(p._id)} className="btn-danger flex items-center gap-1">
-                  <Trash2 className="w-4 h-4" /> Hapus
-                </button>
+                <Button variant="secondary" onClick={() => setEditing(p)}>
+                  <Pencil className="w-4 h-4 mr-1" /> Edit
+                </Button>
+                <Button variant="destructive" onClick={() => handleDelete(p._id)}>
+                  <Trash2 className="w-4 h-4 mr-1" /> Hapus
+                </Button>
               </div>
-            </div>
+            </Card>
           ))
         )}
       </div>
 
       {/* Modal Tambah Produk */}
-      {isAddModalOpen && (
-        <Modal title="Tambah Produk" onClose={() => setIsAddModalOpen(false)}>
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tambah Produk</DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleAddProduct} className="space-y-4">
-            <Input label="Nama Produk" value={name} onChange={setName} required />
-            <Input label="Kategori" value={category} onChange={setCategory} required />
-            <Input label="Link Gambar" value={image} onChange={setImage} required />
-            <Textarea label="Deskripsi" value={description} onChange={setDescription} />
+            <div>
+              <Label>Nama Produk</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div>
+              <Label>Kategori</Label>
+              <Input value={category} onChange={(e) => setCategory(e.target.value)} required />
+            </div>
+            <div>
+              <Label>Link Gambar</Label>
+              <Input value={image} onChange={(e) => setImage(e.target.value)} required />
+            </div>
+            <div>
+              <Label>Deskripsi</Label>
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
 
-            <h3 className="font-semibold text-gray-800 dark:text-gray-100">Varian Produk</h3>
-            <div className="space-y-3">
-              {variants.map((variant, vIndex) => (
-                <div key={vIndex} className="p-2 border rounded-lg bg-gray-50 dark:bg-gray-700">
-                  <div className="grid grid-cols-3 gap-2 items-center">
-                    <input type="text" placeholder="Nama Varian" value={variant.name}
-                      onChange={(e) => handleVariantChange(vIndex, "name", e.target.value)} className="input" required />
-                    <input type="number" placeholder="Harga" value={variant.price}
-                      onChange={(e) => handleVariantChange(vIndex, "price", e.target.value)} className="input" min={0} required />
-                    <input type="number" placeholder="Stok (jumlah akun)" value={variant.stock}
-                      onChange={(e) => handleVariantChange(vIndex, "stock", e.target.value)} className="input" min={0} required />
-                  </div>
-
-                  <div className="mt-3">
-                    {(variant.accounts || []).map((acc, aIndex) => (
-                      <div key={aIndex} className="grid grid-cols-3 gap-2 mb-2">
-                        <input type="text" placeholder="Username" value={acc.username}
-                          onChange={(e) => handleVariantAccountChange(vIndex, aIndex, "username", e.target.value)} className="input" />
-                        <input type="text" placeholder="Password" value={acc.password}
-                          onChange={(e) => handleVariantAccountChange(vIndex, aIndex, "password", e.target.value)} className="input" />
-                        <button type="button" onClick={() => handleRemoveVariantAccount(vIndex, aIndex)} className="btn-danger">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+            {/* Varian */}
+            <h3 className="font-semibold">Varian Produk</h3>
+            {variants.map((variant, vIndex) => (
+              <div key={vIndex} className="p-2 border rounded-lg space-y-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <Input
+                    placeholder="Nama Varian"
+                    value={variant.name}
+                    onChange={(e) => handleVariantChange(vIndex, "name", e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Harga"
+                    value={variant.price}
+                    onChange={(e) => handleVariantChange(vIndex, "price", e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Stok"
+                    value={variant.stock}
+                    onChange={(e) => handleVariantChange(vIndex, "stock", e.target.value)}
+                  />
                 </div>
-              ))}
-            </div>
-
-            <button type="button" onClick={handleAddVariant} className="btn-secondary">
-              <Plus className="w-4 h-4" /> Tambah Varian
-            </button>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <button type="button" onClick={() => setIsAddModalOpen(false)} className="btn-secondary">Batal</button>
-              <button type="submit" className="btn-primary">Simpan Produk & Akun</button>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {/* Modal Edit */}
-      {editing && (
-        <Modal title="Edit Produk" onClose={() => setEditing(null)}>
-          <form onSubmit={handleUpdate} className="space-y-4">
-            <Input label="Nama Produk" value={editing.name} onChange={(val) => setEditing({ ...editing, name: val })} />
-            <Input label="Kategori" value={editing.category} onChange={(val) => setEditing({ ...editing, category: val })} />
-            <Textarea label="Deskripsi" value={editing.description || ""} onChange={(val) => setEditing({ ...editing, description: val })} />
-
-            <h3 className="font-semibold text-gray-800 dark:text-gray-100">Edit Varian</h3>
-            <div className="space-y-2">
-              {editing.variants?.map((variant: Variant, index: number) => (
-                <div key={index} className="grid grid-cols-3 gap-2 border p-2 rounded-lg bg-gray-50 dark:bg-gray-700">
-                  <input type="text" value={variant.name} onChange={(e) => {
-                    const updated = [...editing.variants];
-                    updated[index].name = e.target.value;
-                    setEditing({ ...editing, variants: updated });
-                  }} className="input" />
-                  <input type="number" value={variant.price} onChange={(e) => {
-                    const updated = [...editing.variants];
-                    updated[index].price = Number(e.target.value);
-                    setEditing({ ...editing, variants: updated });
-                  }} className="input" />
-                  <input type="number" value={variant.stock} onChange={(e) => {
-                    const updated = [...editing.variants];
-                    updated[index].stock = Number(e.target.value);
-                    setEditing({ ...editing, variants: updated });
-                  }} className="input" />
+                <div className="space-y-2">
+                  {(variant.accounts || []).map((acc, aIndex) => (
+                    <div key={aIndex} className="grid grid-cols-3 gap-2">
+                      <Input
+                        placeholder="Username"
+                        value={acc.username}
+                        onChange={(e) =>
+                          handleVariantAccountChange(vIndex, aIndex, "username", e.target.value)
+                        }
+                      />
+                      <Input
+                        placeholder="Password"
+                        value={acc.password}
+                        onChange={(e) =>
+                          handleVariantAccountChange(vIndex, aIndex, "password", e.target.value)
+                        }
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => handleRemoveVariantAccount(vIndex, aIndex)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+            <Button type="button" variant="secondary" onClick={handleAddVariant}>
+              <Plus className="w-4 h-4 mr-1" /> Tambah Varian
+            </Button>
 
-            <div className="flex justify-end gap-2 pt-4">
-              <button type="button" onClick={() => setEditing(null)} className="btn-secondary">Batal</button>
-              <button type="submit" className="btn-primary">Simpan Perubahan</button>
-            </div>
+            <DialogFooter>
+              <Button type="submit">Simpan Produk & Akun</Button>
+            </DialogFooter>
           </form>
-        </Modal>
-      )}
-    </div>
-  );
-}
+        </DialogContent>
+      </Dialog>
 
-/* Reusable UI components */
-function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-fadeIn">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-3xl shadow-lg relative animate-scaleIn overflow-y-auto max-h-[90vh]">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-          <X className="w-5 h-5" />
-        </button>
-        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">{title}</h2>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Input({ label, value, onChange, required }: { label: string; value: string; onChange: (v: string) => void; required?: boolean }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} required={required} className="input" />
-    </div>
-  );
-}
-
-function Textarea({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
-      <textarea value={value} onChange={(e) => onChange(e.target.value)} className="input" />
+      {/* Modal Edit Produk */}
+      <Dialog open={!!editing} onOpenChange={() => setEditing(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Produk</DialogTitle>
+          </DialogHeader>
+          {editing && (
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div>
+                <Label>Nama Produk</Label>
+                <Input
+                  value={editing.name}
+                  onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Kategori</Label>
+                <Input
+                  value={editing.category}
+                  onChange={(e) => setEditing({ ...editing, category: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Deskripsi</Label>
+                <Textarea
+                  value={editing.description}
+                  onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+                />
+              </div>
+              <h3 className="font-semibold">Edit Varian</h3>
+              <div className="space-y-2">
+                {editing.variants?.map((variant: Variant, index: number) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-3 gap-2 border p-2 rounded-lg"
+                  >
+                    <Input
+                      value={variant.name}
+                      onChange={(e) => {
+                        const updated = [...editing.variants];
+                        updated[index].name = e.target.value;
+                        setEditing({ ...editing, variants: updated });
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      value={variant.price}
+                      onChange={(e) => {
+                        const updated = [...editing.variants];
+                        updated[index].price = Number(e.target.value);
+                        setEditing({ ...editing, variants: updated });
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      value={variant.stock}
+                      onChange={(e) => {
+                        const updated = [...editing.variants];
+                        updated[index].stock = Number(e.target.value);
+                        setEditing({ ...editing, variants: updated });
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <DialogFooter>
+                <Button type="submit">Simpan Perubahan</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

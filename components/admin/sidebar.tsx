@@ -1,8 +1,10 @@
-'use client';
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Package, ShoppingCart, BarChart3, Key, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const menu = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -16,46 +18,44 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 h-screen bg-white dark:bg-gray-900 border-r dark:border-gray-800 flex flex-col transition-colors duration-500">
+    <aside className="w-64 h-screen bg-background border-r flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b dark:border-gray-800">
-        <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">⚡ Admin Panel</h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400">Kelola semua data dengan mudah</p>
+      <div className="p-4 border-b">
+        <h2 className="text-xl font-extrabold">Admin Panel</h2>
+        <p className="text-xs text-muted-foreground">Kelola semua data dengan mudah</p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 flex flex-col gap-2">
+      <nav className="flex-1 p-4 flex flex-col gap-1">
         {menu.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-all duration-300 
-                ${
-                  isActive
-                    ? "bg-green-100 text-green-700 dark:bg-green-800/70 dark:text-green-200 border-l-4 border-green-500"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:translate-x-1"
-                }`}
-            >
-              <Icon
-                className={`w-5 h-5 transition-colors duration-300 ${
-                  isActive ? "text-green-600 dark:text-green-300" : "text-gray-500 dark:text-gray-400"
-                }`}
-              />
-              <span>{item.name}</span>
+            <Link key={item.name} href={item.href}>
+              <Button
+                variant={isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-3",
+                  isActive && "font-semibold bg-muted"
+                )}
+              >
+                <Icon className="w-5 h-5" />
+                <span>{item.name}</span>
+              </Button>
             </Link>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t dark:border-gray-800">
-        <button className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-300">
+      <div className="p-4 border-t">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30"
+        >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
-        </button>
+        </Button>
       </div>
     </aside>
   );

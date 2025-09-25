@@ -2,6 +2,23 @@
 
 import useSWR from "swr";
 import { Loader2 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -37,9 +54,9 @@ export default function OrdersPage() {
 
   if (error) {
     return (
-      <div className="p-4 bg-red-100 text-red-600 rounded">
+      <Card className="p-4 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300">
         ❌ Gagal memuat data orders
-      </div>
+      </Card>
     );
   }
 
@@ -54,70 +71,71 @@ export default function OrdersPage() {
     <div>
       <h1 className="text-2xl font-bold mb-6">Data Pemesanan</h1>
 
-      <div className="overflow-x-auto shadow rounded-lg border border-gray-200 dark:border-gray-700">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100 dark:bg-gray-800 text-left">
-            <tr>
-              <th className="px-4 py-3">Order ID</th>
-              <th className="px-4 py-3">Customer</th>
-              <th className="px-4 py-3">Product</th>
-              <th className="px-4 py-3">Amount</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.map((order: any, idx: number) => (
-              <tr
-                key={order._id}
-                className={`${
-                  idx % 2 === 0
-                    ? "bg-white dark:bg-gray-900"
-                    : "bg-gray-50 dark:bg-gray-800"
-                }`}
-              >
-                <td className="px-4 py-3 font-mono text-xs">{order.order_id}</td>
-                <td className="px-4 py-3">
+      <Card className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order ID</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Product</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Aksi</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data?.map((order: any) => (
+              <TableRow key={order._id}>
+                <TableCell className="font-mono text-xs">{order.order_id}</TableCell>
+                <TableCell>
                   <div className="font-medium">{order.customer_name}</div>
                   <div className="text-gray-500 text-xs">{order.customer_email}</div>
-                </td>
-                <td className="px-4 py-3">{order.product_name}</td>
-                <td className="px-4 py-3 font-semibold">
+                </TableCell>
+                <TableCell>{order.product_name}</TableCell>
+                <TableCell className="font-semibold">
                   Rp {Number(order.gross_amount).toLocaleString()}
-                </td>
-                <td className="px-4 py-3">
-                  <select
-                    className={`px-2 py-1 rounded text-xs font-medium ${statusColors[order.status] || ""}`}
-                    value={order.status}
-                    onChange={(e) => updateStatus(order._id, e.target.value)}
+                </TableCell>
+                <TableCell>
+                  <Select
+                    defaultValue={order.status}
+                    onValueChange={(value) => updateStatus(order._id, value)}
                   >
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="canceled">Canceled</option>
-                  </select>
-                </td>
-                <td className="px-4 py-3">
-                  <button
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs"
+                    <SelectTrigger
+                      className={`h-8 w-[110px] text-xs font-medium ${statusColors[order.status] || ""}`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="paid">Paid</SelectItem>
+                      <SelectItem value="shipped">Shipped</SelectItem>
+                      <SelectItem value="canceled">Canceled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="bg-blue-500 hover:bg-blue-600 text-white text-xs"
                     onClick={() => resendAccount(order._id)}
                   >
                     Kirim Ulang Akun
-                  </button>
-                </td>
-              </tr>
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))}
 
             {!data?.length && (
-              <tr>
-                <td colSpan={6} className="text-center py-6 text-gray-500">
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-6 text-gray-500">
                   Belum ada order.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   );
 }
