@@ -496,8 +496,8 @@ const SidebarGroupContent = React.forwardRef<
 SidebarGroupContent.displayName = "SidebarGroupContent"
 
 const SidebarMenu = React.forwardRef<
-  HTMLUListElement,
-  React.HTMLAttributes<HTMLUListElement>
+  React.ElementRef<"ul">,
+  React.ComponentPropsWithoutRef<"ul">
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
