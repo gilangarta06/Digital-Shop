@@ -393,15 +393,15 @@ function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function SidebarGroupLabel({
-  className,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"div"> & { asChild?: boolean }) {
+const SidebarGroupLabel = React.forwardRef<
+  React.ElementRef<"div">,
+  React.ComponentProps<"div"> & { asChild?: boolean }
+>(({ className, asChild = false, ...props }, ref) => {
   const Comp = asChild ? Slot : "div"
 
   return (
     <Comp
+      ref={ref}
       data-slot="sidebar-group-label"
       data-sidebar="group-label"
       className={cn(
@@ -412,7 +412,8 @@ function SidebarGroupLabel({
       {...props}
     />
   )
-}
+})
+SidebarGroupLabel.displayName = "SidebarGroupLabel"
 
 function SidebarGroupAction({
   className,
